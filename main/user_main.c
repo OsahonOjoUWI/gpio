@@ -63,12 +63,14 @@ static void gpio_isr_handler(void *arg)
 //obtains/takes semaphore
 static void gpio_task_example(void *arg)
 {
+    ESP_LOGI(TAG, "Entered gpio_task_example\n");
     for (;;) {
         if (xSemaphoreTake(xSemaphore, (TickType_t) 10)) {
             ESP_LOGI(TAG, "GPIO[%d] intr, val: %d\n", GPIO_INPUT_IO_0, gpio_get_level(GPIO_INPUT_IO_0));
             ESP_LOGI(TAG, "Semaphore obtained!\n");
         }
     }
+    ESP_LOGI(TAG, "Exited gpio_task_example\n");
 }
 
 void app_main(void)
@@ -99,6 +101,7 @@ void app_main(void)
 
     //create binary semaphore
     xSemaphore = xSemaphoreCreateBinary();
+    xSemaphoreGive(xSemaphore);
     ESP_LOGI(TAG, "Semaphore created!\n");
 
     //start gpio task
@@ -109,7 +112,12 @@ void app_main(void)
     gpio_install_isr_service(0);
 
     //hook isr handler for GPIO0 pin
-    //assumed parameters: io_pin, handler_fxn, parameter_for_handler_fxn 
+    //assumed parameters: io_pin, handler_fxn, parameter_for_handler_fxn
+    gpio_isr_handler_add(GPIO_INPUT_IO_0, gpio_isr_handler, (void *) GPIO_INPUT_IO_0);
+
+    //remove isr handler for gpio number.
+    gpio_isr_handler_remove(GPIO_INPUT_IO_0);
+    //hook isr handler for specific gpio pin again
     gpio_isr_handler_add(GPIO_INPUT_IO_0, gpio_isr_handler, (void *) GPIO_INPUT_IO_0);
 
     int cnt = 0;

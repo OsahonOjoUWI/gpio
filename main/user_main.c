@@ -57,7 +57,8 @@ SemaphoreHandle_t xSemaphore = NULL;
 static void gpio_isr_handler(void *arg)
 {
     xSemaphoreGiveFromISR(xSemaphore, pdFALSE);
-    ESP_LOGI(TAG, "Released semaphore.\n");
+    //This ESP_LOG statement was causing the StoreProhibited error
+    //ESP_LOGI(TAG, "Released semaphore.\n");
 }
 
 //obtains/takes semaphore
@@ -113,11 +114,6 @@ void app_main(void)
 
     //hook isr handler for GPIO0 pin
     //assumed parameters: io_pin, handler_fxn, parameter_for_handler_fxn
-    gpio_isr_handler_add(GPIO_INPUT_IO_0, gpio_isr_handler, (void *) GPIO_INPUT_IO_0);
-
-    //remove isr handler for gpio number.
-    gpio_isr_handler_remove(GPIO_INPUT_IO_0);
-    //hook isr handler for specific gpio pin again
     gpio_isr_handler_add(GPIO_INPUT_IO_0, gpio_isr_handler, (void *) GPIO_INPUT_IO_0);
 
     int cnt = 0;
